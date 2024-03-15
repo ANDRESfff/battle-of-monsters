@@ -1,5 +1,6 @@
 ﻿using API.Controllers;
 using API.Test.Fixtures;
+using Business.Services;
 using FluentAssertions;
 using Lib.Repository.Entities;
 using Lib.Repository.Repository;
@@ -11,10 +12,12 @@ namespace API.Test;
 public class BattleControllerTests
 {
     private readonly Mock<IBattleOfMonstersRepository> _repository;
+    private readonly IBattleService _battleService;
 
     public BattleControllerTests()
     {
         this._repository = new Mock<IBattleOfMonstersRepository>();
+        this._battleService = new BattleService(_repository.Object);
     }
 
     [Fact]
@@ -24,7 +27,7 @@ public class BattleControllerTests
             .Setup(x => x.Battles.GetAllAsync())
             .ReturnsAsync(BattlesFixture.GetBattlesMock());
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
         ActionResult result = await sut.GetAll();
         OkObjectResult objectResults = (OkObjectResult)result;
         objectResults?.Value.Should().BeOfType<Battle[]>();
@@ -55,7 +58,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         BadRequestObjectResult objectResults = (BadRequestObjectResult)result;
@@ -89,7 +92,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         NotFoundObjectResult objectResults = (NotFoundObjectResult)result;
@@ -126,7 +129,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         OkObjectResult objectResults = (OkObjectResult)result;
@@ -168,7 +171,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         OkObjectResult objectResults = (OkObjectResult)result;
@@ -206,7 +209,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         OkObjectResult objectResults = (OkObjectResult)result;
@@ -248,7 +251,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         OkObjectResult objectResults = (OkObjectResult)result;
@@ -290,7 +293,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         OkObjectResult objectResults = (OkObjectResult)result;
@@ -333,7 +336,7 @@ public class BattleControllerTests
             .Setup(x => x.Monsters.FindAsync(idMonsterB))
             .ReturnsAsync(monsterB);
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Add(b);
         OkObjectResult objectResults = (OkObjectResult)result;
@@ -357,7 +360,7 @@ public class BattleControllerTests
         this._repository
            .Setup(x => x.Battles.RemoveAsync(id));
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Remove(id);
         OkResult objectResults = (OkResult)result;
@@ -378,7 +381,7 @@ public class BattleControllerTests
         this._repository
            .Setup(x => x.Battles.RemoveAsync(id));
 
-        BattleController sut = new BattleController(_repository.Object);
+        BattleController sut = new BattleController(_battleService);
 
         ActionResult result = await sut.Remove(id);
         NotFoundResult objectResults = (NotFoundResult)result;

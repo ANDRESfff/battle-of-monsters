@@ -1,6 +1,5 @@
-﻿using Lib.Repository.Entities;
-using Lib.Repository.Repository;
-using Lib.Repository.Services;
+﻿using Business.Services;
+using Lib.Repository.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -8,18 +7,18 @@ namespace API.Controllers;
 
 public class BattleController : BaseApiController
 {
-    private readonly IBattleOfMonstersRepository _repository;
+    private readonly IBattleService _battleService;
 
-    public BattleController(IBattleOfMonstersRepository repository)
+    public BattleController( IBattleService battleService)
     {
-        _repository = repository;
+        _battleService = battleService;
     }
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> GetAll()
     {
-        IEnumerable<Battle> battles = await _repository.Battles.GetAllAsync();
+        IEnumerable<Battle> battles = await _battleService.GetBattles();
         return Ok(battles);
     }
 
@@ -31,33 +30,10 @@ public class BattleController : BaseApiController
         if (battle.MonsterA == null || battle.MonsterB == null)
             return BadRequest("Missing ID");
 
-        Monster monsterA = await _repository.Monsters.FindAsync(battle.MonsterA);
-        Monster monsterB = await _repository.Monsters.FindAsync(battle.MonsterB);
+        Battle battleDb = await _battleService.CreateBattle(battle.MonsterA, battle.MonsterB);
 
-        if (monsterA == null || monsterB == null)
+        if (battleDb == null)
             return NotFound("Monster not found.");
-
-        Round round = BattleService.GetFirstAttacker(monsterA, monsterB);
-
-        while (monsterA.Hp > 0 && monsterB.Hp > 0)
-        {
-            Monster attacker = round.Attacker;
-            Monster attacked = round.Attacked;
-            int damage = BattleService.GetDamage(round.Attacker, round.Attacked);
-            round.Attacked.Hp -= damage;
-            round.Attacker = attacked;
-            round.Attacked = attacker;
-        }
-
-        Battle battleDb = new Battle()
-        {
-            MonsterA = monsterA.Id,
-            MonsterB = monsterB.Id,
-            Winner = monsterA.Hp > 0 ? monsterA.Id : monsterB.Id
-        };
-
-        await _repository.Battles.AddAsync(battleDb);
-        await _repository.Save();
 
         return Ok(battleDb);
     }
@@ -67,10 +43,11 @@ public class BattleController : BaseApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> Remove(int id)
     {
-        if (await _repository.Battles.FindAsync(id) == null)
+
+        if (await _battleService.GetBattleById(id) == null)
             return NotFound();
-        await _repository.Battles.RemoveAsync(id);
-        await _repository.Save();
+
+        await _battleService.RemoveBattle(id);
         return Ok();
     }
 }
